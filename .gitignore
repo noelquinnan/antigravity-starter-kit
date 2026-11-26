@@ -1,0 +1,7 @@
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+*.log
+*.tmp
+config/rules/user-profile.md

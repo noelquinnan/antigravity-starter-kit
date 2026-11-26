@@ -1,0 +1,186 @@
+/* ==========================================================================
+   user.css - local "less messy" tweaks on top of theme.css (小克, 2026-11-25)
+   Delete this file (or empty it) to go back to the original theme.
+   ========================================================================== */
+
+/* 1. Inline code in replies: neutral text color instead of clay red,
+      so `paths` and `commands` no longer look like warnings. */
+code:not(pre code) {
+  color: inherit !important;
+  font-size: 0.9em !important;
+}
+
+/* 2. File / link pills inside replies: body text color, accent only on hover. */
+.inline-pill,
+.inline-pill * {
+  color: inherit !important;
+}
+.inline-pill:hover,
+.inline-pill:hover * {
+  color: #C6613F !important;
+}
+
+/* 3. Reply text: a bit larger with more line spacing, clearer paragraph gaps. */
+.leading-relaxed.select-text :is(p, li) {
+  font-size: 15px !important;
+  line-height: 1.75 !important;
+}
+.leading-relaxed.select-text > p + p {
+  margin-top: 0.75em !important;
+}
+.leading-relaxed.select-text li + li {
+  margin-top: 0.3em !important;
+}
+
+/* ==========================================================================
+   Round 2 polish (2026-11-25). Uses the theme's tokens, so light and dark
+   mode both work. Delete this block to go back to round 1.
+   ========================================================================== */
+
+/* 4. Headings in replies: clearly different from body text. */
+.leading-relaxed.select-text :is(h1, h2, h3, h4) {
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  margin-top: 1.4em !important;
+  margin-bottom: 0.45em !important;
+}
+.leading-relaxed.select-text h1 { font-size: 20px !important; }
+.leading-relaxed.select-text h2 { font-size: 18px !important; }
+.leading-relaxed.select-text :is(h3, h4) { font-size: 16.5px !important; }
+.leading-relaxed.select-text > :is(h1, h2, h3, h4):first-child { margin-top: 0.2em !important; }
+
+/* 5. List markers and numbers: soft clay accent instead of black. */
+.leading-relaxed.select-text li::marker {
+  color: #D97757;
+  font-weight: 600;
+}
+
+/* 6. Bold text: a touch of warmth so key words stand out. */
+.leading-relaxed.select-text :is(strong, b) {
+  font-weight: 650 !important;
+}
+
+/* 7. Quotes: clay bar on the left, quieter text. */
+.leading-relaxed.select-text blockquote {
+  border-left: 3px solid #D97757 !important;
+  background: var(--secondary) !important;
+  padding: 0.5em 0.9em !important;
+  border-radius: 0 8px 8px 0 !important;
+  margin: 0.8em 0 !important;
+  opacity: 0.92;
+}
+
+/* 8. Tables: light grid, header tint, zebra rows. */
+.leading-relaxed.select-text table {
+  border-collapse: collapse !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0.8em 0 !important;
+}
+.leading-relaxed.select-text :is(th, td) {
+  border: 1px solid var(--border) !important;
+  padding: 0.45em 0.8em !important;
+}
+.leading-relaxed.select-text th {
+  background: var(--secondary) !important;
+  font-weight: 600 !important;
+}
+.leading-relaxed.select-text tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--secondary) 45%, transparent) !important;
+}
+
+/* 9. Divider lines: soft. */
+.leading-relaxed.select-text hr {
+  border: 0 !important;
+  border-top: 1px solid var(--border) !important;
+  margin: 1.4em 0 !important;
+}
+
+/* 10. Your own message bubble: warm paper tint instead of plain white. */
+.agy-user-bubble {
+  background: var(--secondary) !important;
+}
+
+/* 11. Thin, quiet scrollbars. */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 18%, transparent);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--foreground) 32%, transparent);
+}
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ==========================================================================
+   Round 3 (2026-11-25): calmer, roomier left sidebar + context meter badge.
+   Delete this block to go back to round 2.
+   ========================================================================== */
+
+/* 12. "New chat": Claude-style - no box, clay plus icon, a bit larger. */
+[data-testid="new-conversation-button"] {
+  border-color: transparent !important;
+  background: transparent !important;
+  font-weight: 500 !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+[data-testid="new-conversation-button"]:hover { background: var(--sidebar-muted, var(--secondary)) !important; }
+[data-testid="new-conversation-button"] svg { color: #D97757 !important; }
+
+/* 13. Section titles (项目 / 对话): small, spaced, quiet - like Claude's "Recents". */
+[class*="group/section-header"] h2 {
+  font-size: 12px !important;
+  letter-spacing: 0.06em;
+  opacity: 0.55 !important;
+}
+[class*="group/section-header"] { margin-top: 10px; }
+
+/* 14. Project folder names: a little stronger than chats, so groups read clearly. */
+button[class*="group-hover/headerbtn"] {
+  font-weight: 500 !important;
+  color: var(--foreground) !important;
+  opacity: 0.85;
+}
+
+/* 15. Chat rows: more breathing room, softer selected state with a clay mark. */
+[data-testid="conversation-row-sidebar"] {
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  margin: 1px 0;
+}
+[data-testid="conversation-row-sidebar"][data-selected="true"] {
+  background: var(--secondary) !important;
+  box-shadow: inset 2.5px 0 0 #D97757 !important;
+}
+[data-testid="conversation-row-sidebar"][data-selected="true"] .truncate { font-weight: 500; }
+
+/* 16. Timestamps ("20小时"): smaller and fainter; full strength on hover. */
+[data-testid="conversation-row-sidebar"] .tabular-nums {
+  font-size: 11.5px !important;
+  opacity: 0.38 !important;
+  transition: opacity .15s;
+}
+[data-testid="conversation-row-sidebar"]:hover .tabular-nums { opacity: 0.7 !important; }
+
+/* 17. Context meter badge in the input bar (drawn by meter.js). */
+#ag-ctx-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px;
+  margin-right: 2px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted-foreground, inherit);
+  cursor: default;
+}
+#ag-ctx-meter:hover { background: var(--secondary); }
+#ag-ctx-meter b { font-weight: 500; font-variant-numeric: tabular-nums; }
+#ag-ctx-meter .bg { stroke: color-mix(in srgb, var(--foreground) 15%, transparent); }
+#ag-ctx-meter .fg { stroke: #8A9A5B; transition: stroke-dasharray .4s; }
+#ag-ctx-meter[data-level="mid"] .fg { stroke: #D97757; }
+#ag-ctx-meter[data-level="high"] .fg { stroke: #C0392B; }
+#ag-ctx-meter[data-level="high"] b { color: #C0392B; }

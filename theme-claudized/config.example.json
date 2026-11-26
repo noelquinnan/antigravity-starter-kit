@@ -1,0 +1,14 @@
+{
+  "translate": true,
+  "locale": "zh-CN",
+  "themeStyle": "clay",
+  "latinFont": "claude",
+  "cjkFont": "wenkai",
+  "chineseTitles": true,
+  "hidePluginProjects": true,
+  "geminiMode": true,
+  "geminiEngine": "edge",
+  "geminiUrl": "https://gemini.google.com/app",
+  "geminiLayout": "float",
+  "geminiHotkey": "Ctrl+Alt+G"
+}

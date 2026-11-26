@@ -1,0 +1,933 @@
+/* ==========================================================================
+   Antigravity Theme Patch · Claude Code style · Light + Dark · v4
+   Generated for Windows 11; also used on macOS
+
+   How the cascade works here (verified against the live app):
+   - Antigravity writes its palette as an *inline style on <html>*
+     (--background, --sidebar, --card, ... and all --vscode-*).
+   - Tailwind tokens are declared on :root as `--color-x: var(--x)`, so they
+     resolve on <html>. Overriding only on <body> would NOT reach bg-sidebar,
+     text-primary etc.
+   - Therefore palettes are declared on `html:has(> body.theme-xxx)` with
+     !important (author !important beats a non-important inline style).
+     Switching Light/Dark in Antigravity's settings flips body.theme-light /
+     body.theme-dark and the matching block applies.
+   - Components (composer, user bubble) are restyled by redefining --card /
+     --card-border *inside* them, so their own Tailwind classes do the work.
+
+   Two styles, picked in Settings > Appearance (html[data-ag-style]):
+     - clay    (陶土, default): ivory / charcoal with clay-red accents,
+                sections 1-5 below.
+     - classic (经典): neutral white / black like the Claude Code app, blue
+                selection and links, section 8 overrides 1-5.
+
+   Sections
+     1. Light tokens   (Clay: ivory)
+     2. Dark tokens    (Clay: charcoal)
+     3. Components     (shared, driven by --ag-* tokens)
+     4. Code syntax    (warm Prism palettes)
+     5. VS Code bridge (embedded editor / diff / terminal)
+     6. Fonts
+     7. Title bar
+     8. Classic style  (neutral light + dark, overrides 1, 2, 4, 5)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. Light · Claude Code ivory
+   Surfaces: #FFFFFF raised · #FAF9F5 canvas · #F5F3EC sidebar ·
+             #F0EEE6 bubble / fills · #E9E6DC selected
+   Text:     #141413 · #3D3D3A · #73726C · #9C9A92
+   Accent:   #C6613F clay (fills) · #D97757 (tints)
+   ========================================================================== */
+html:has(> body.theme-light),
+body.theme-light {
+  color-scheme: light !important;
+
+  --background: #FAF9F5 !important;
+  --content: #FAF9F5 !important;
+  --foreground: #141413 !important;
+
+  --sidebar: #F5F3EC !important;
+  --sidebar-secondary: #E9E6DC !important;   /* selected row */
+  --sidebar-muted: #EEEBE3 !important;       /* hovered row  */
+
+  --card: #FFFFFF !important;
+  --card-border: rgba(31, 30, 29, 0.15) !important;
+  --border: rgba(31, 30, 29, 0.12) !important;
+
+  --secondary: #F0EEE6 !important;
+  --secondary-foreground: #3D3D3A !important;
+  --muted: #F2F0E9 !important;
+  --muted-foreground: #73726C !important;
+  --placeholder: #9C9A92 !important;
+
+  --primary: #C6613F !important;
+  --primary-foreground: #FFFFFF !important;
+  --link: #B4552F !important;
+  --error: #B53333 !important;
+  --warning: #96690C !important;
+  --success: #4E7A3C !important;
+  --code-foreground: #A3412B !important;
+
+  --focus-ring-color: rgba(198, 97, 63, 0.30) !important;
+  --focus-ring-offset-color: #FAF9F5 !important;
+
+  --bg-selection: rgba(217, 119, 87, 0.20) !important;
+  --bg-selection-overlay: rgba(217, 119, 87, 0.16) !important;
+  --bg-cursor-line: rgba(31, 30, 29, 0.035) !important;
+  --fg-cursor: #C6613F !important;
+
+  /* --ag-* : tokens consumed by section 3 */
+  --ag-user-bubble: #F0EEE6;
+  --ag-composer-border: rgba(31, 30, 29, 0.15);
+  --ag-composer-border-focus: rgba(31, 30, 29, 0.30);
+  --ag-composer-shadow: 0 1px 2px rgba(31, 30, 29, 0.04), 0 6px 24px rgba(31, 30, 29, 0.06);
+  --ag-accent-fill: #C6613F;
+  --ag-accent-fill-hover: #B5552F;
+  --ag-focus: rgba(198, 97, 63, 0.55);
+  --ag-selection: rgba(217, 119, 87, 0.22);
+  --ag-scroll-thumb: rgba(31, 30, 29, 0.18);
+  --ag-scroll-thumb-active: rgba(31, 30, 29, 0.34);
+  --ag-sidebar-text: #3D3D3A;
+  --ag-sidebar-text-strong: #141413;
+  --ag-sidebar-label: #85837C;
+}
+
+
+/* ==========================================================================
+   2. Dark · Claude Code charcoal
+   Surfaces: #30302E raised · #262624 canvas · #1F1E1D sidebar / bubble ·
+             #2B2A27 fills · #393835 selected
+   Text:     #F0EEE6 · #C2C0B6 · #9C9A92 · #75736C
+   Accent:   #D97757 terracotta
+   ========================================================================== */
+html:has(> body.theme-dark),
+html:has(> body.dark),
+body.theme-dark,
+body.dark {
+  color-scheme: dark !important;
+
+  --background: #262624 !important;
+  --content: #262624 !important;
+  --foreground: #F0EEE6 !important;
+
+  --sidebar: #1F1E1D !important;
+  --sidebar-secondary: #393835 !important;
+  --sidebar-muted: #2B2A27 !important;
+
+  --card: #30302E !important;
+  --card-border: rgba(222, 220, 209, 0.14) !important;
+  --border: rgba(222, 220, 209, 0.11) !important;
+
+  --secondary: #3A3936 !important;
+  --secondary-foreground: #C2C0B6 !important;
+  --muted: #2B2A27 !important;
+  --muted-foreground: #9C9A92 !important;
+  --placeholder: #75736C !important;
+
+  --primary: #D97757 !important;
+  --primary-foreground: #FFFFFF !important;
+  --link: #E39C80 !important;
+  --error: #E5786D !important;
+  --warning: #E0A458 !important;
+  --success: #8DB676 !important;
+  --code-foreground: #E8A589 !important;
+
+  --focus-ring-color: rgba(217, 119, 87, 0.35) !important;
+  --focus-ring-offset-color: #262624 !important;
+
+  --bg-selection: rgba(217, 119, 87, 0.28) !important;
+  --bg-selection-overlay: rgba(217, 119, 87, 0.22) !important;
+  --bg-cursor-line: rgba(240, 238, 230, 0.035) !important;
+  --fg-cursor: #D97757 !important;
+
+  --ag-user-bubble: #1F1E1D;
+  --ag-composer-border: rgba(222, 220, 209, 0.15);
+  --ag-composer-border-focus: rgba(222, 220, 209, 0.30);
+  --ag-composer-shadow: 0 1px 2px rgba(0, 0, 0, 0.20), 0 8px 28px rgba(0, 0, 0, 0.28);
+  --ag-accent-fill: #C6613F;
+  --ag-accent-fill-hover: #D06D4B;
+  --ag-focus: rgba(217, 119, 87, 0.60);
+  --ag-selection: rgba(217, 119, 87, 0.32);
+  --ag-scroll-thumb: rgba(222, 220, 209, 0.16);
+  --ag-scroll-thumb-active: rgba(222, 220, 209, 0.32);
+  --ag-sidebar-text: #CFCCC2;
+  --ag-sidebar-text-strong: #FAF9F5;
+  --ag-sidebar-label: #8A877F;
+}
+
+
+/* ==========================================================================
+   3. Components (shared by both modes, colors come from --ag-* tokens)
+   ========================================================================== */
+
+/* 3a. Composer: raised card, hairline border, soft float shadow.
+       The wrapper is `p-px bg-card-border`, i.e. its background IS the border. */
+#antigravity\.agentSidePanelInputBox {
+  background-color: var(--ag-composer-border) !important;
+  box-shadow: var(--ag-composer-shadow) !important;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+#antigravity\.agentSidePanelInputBox:focus-within {
+  background-color: var(--ag-composer-border-focus) !important;
+}
+
+/* 3b. Send button: clay fill once there is something to send */
+[data-testid="send-button"]:not(:disabled) {
+  background-color: var(--ag-accent-fill) !important;
+  color: #FFFFFF !important;
+}
+[data-testid="send-button"]:not(:disabled):hover {
+  background-color: var(--ag-accent-fill-hover) !important;
+}
+
+/* 3c. User message: borderless filled block (like Claude Code), not an
+       outlined card. Redefining the tokens here also recolors the hover
+       toolbar's glow so it blends into the bubble. */
+[data-testid="user-input-step"] {
+  --card: var(--ag-user-bubble) !important;
+  --color-card: var(--ag-user-bubble) !important;
+  --card-border: transparent !important;
+  --color-card-border: transparent !important;
+}
+
+/* 3d. Sidebar rows: quiet text, stronger only when selected */
+.bg-sidebar [data-testid="conversation-row-sidebar"],
+.bg-sidebar [data-testid="conversation-row-sidebar"] span,
+.bg-sidebar button[data-testid="project-header"],
+.bg-sidebar button[data-testid="project-header"] span {
+  color: var(--ag-sidebar-text) !important;
+  /* 400, not 450: LXGW WenKai ships 400/500 only, and CSS rounds 450 up to
+     500 for CJK, which would make every row as heavy as the selected one. */
+  font-weight: 400 !important;
+  letter-spacing: -0.008em !important;
+  font-variant-numeric: tabular-nums;
+}
+.bg-sidebar [data-testid="conversation-row-sidebar"][data-selected="true"],
+.bg-sidebar [data-testid="conversation-row-sidebar"][data-selected="true"] span {
+  color: var(--ag-sidebar-text-strong) !important;
+  font-weight: 520 !important;
+}
+.bg-sidebar [data-testid="section-header"],
+.bg-sidebar [data-testid="section-header"] *,
+.bg-sidebar [class*="uppercase"] {
+  color: var(--ag-sidebar-label) !important;
+  font-weight: 500 !important;
+}
+/* The app also puts opacity-50 on these headers; with the muted color that
+   double-dims them below legibility. */
+.bg-sidebar [data-testid="section-header"] h2 {
+  opacity: 1 !important;
+}
+.bg-sidebar [data-testid="conversation-row-sidebar"] {
+  transition: background-color 120ms ease;
+}
+
+/* 3e. Agent process rows ("Worked for…", "Thinking"): secondary until hovered */
+[data-testid="worked-for-collapsible"],
+[data-testid="thinking-collapsible-trigger"] {
+  color: var(--muted-foreground) !important;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+[data-testid="worked-for-collapsible"]:hover,
+[data-testid="thinking-collapsible-trigger"]:hover {
+  color: var(--foreground) !important;
+}
+
+/* 3f. Markdown details */
+[data-testid="planner-response-text"] hr,
+.prose hr {
+  border: 0 !important;
+  height: 1px !important;
+  background-color: var(--border) !important;
+  margin: 1.5em 0 !important;
+}
+[data-testid="planner-response-text"] blockquote {
+  border-left: 3px solid var(--ag-focus) !important;
+  padding-left: 0.9em !important;
+  color: var(--secondary-foreground) !important;
+}
+[data-testid="planner-response-text"] a {
+  color: var(--link) !important;
+  text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent) !important;
+  text-underline-offset: 2px;
+}
+[data-testid="planner-response-text"] table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+[data-testid="planner-response-text"] th,
+[data-testid="planner-response-text"] td {
+  border-color: var(--border) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 3g. Overlay scrollbar */
+[data-testid="overlay-scrollbar-thumb"] {
+  background-color: var(--ag-scroll-thumb) !important;
+}
+[data-expanded="true"] [data-testid="overlay-scrollbar-thumb"],
+[data-testid="overlay-scrollbar-thumb"]:hover {
+  background-color: var(--ag-scroll-thumb-active) !important;
+}
+
+/* 3h. Selection, caret and keyboard focus (focus ring only for keyboard nav) */
+::selection {
+  background-color: var(--ag-selection);
+}
+div[contenteditable="true"],
+textarea,
+input {
+  caret-color: var(--fg-cursor);
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="option"]:focus-visible {
+  outline: 2px solid var(--ag-focus) !important;
+  outline-offset: 2px !important;
+}
+
+
+/* ==========================================================================
+   4. Code syntax (Prism code blocks in chat)
+   ========================================================================== */
+/* Light: ink-on-paper, low saturation */
+body.theme-light {
+  --syntax-default-fg: #2B2A27 !important;
+  --syntax-comment: #8F8C84 !important;
+  --syntax-punctuation: #6F6D66 !important;
+  --syntax-property: #A3412B !important;
+  --syntax-tag: #A3412B !important;
+  --syntax-constant: #A3412B !important;
+  --syntax-deleted: #B53333 !important;
+  --syntax-number: #9A5B13 !important;
+  --syntax-string: #4E7A3C !important;
+  --syntax-inserted: #4E7A3C !important;
+  --syntax-attr-name: #8A5A00 !important;
+  --syntax-builtin: #4E7A3C !important;
+  --syntax-operator: #5F5D57 !important;
+  --syntax-variable: #8A4B26 !important;
+  --syntax-attr-value: #2F6F73 !important;
+  --syntax-keyword: #B4552F !important;
+  --syntax-function: #6B4FA0 !important;
+  --syntax-class-name: #6B4FA0 !important;
+  --syntax-regex: #9A5B13 !important;
+}
+/* Dark: terracotta keywords, sage strings, gold functions */
+body.theme-dark,
+body.dark {
+  --syntax-default-fg: #E8E5DC !important;
+  --syntax-comment: #857F73 !important;
+  --syntax-punctuation: #A8A396 !important;
+  --syntax-property: #E5867A !important;
+  --syntax-tag: #E5867A !important;
+  --syntax-constant: #E5867A !important;
+  --syntax-deleted: #E5786D !important;
+  --syntax-number: #D9A26B !important;
+  --syntax-string: #A9C68A !important;
+  --syntax-inserted: #8DB676 !important;
+  --syntax-attr-name: #E3C07A !important;
+  --syntax-builtin: #A9C68A !important;
+  --syntax-operator: #C8C2B4 !important;
+  --syntax-variable: #E8C08A !important;
+  --syntax-attr-value: #9CC3BE !important;
+  --syntax-keyword: #D97757 !important;
+  --syntax-function: #E3C07A !important;
+  --syntax-class-name: #E3C07A !important;
+  --syntax-regex: #E0A458 !important;
+}
+code[class*="language-"],
+pre[class*="language-"] {
+  text-shadow: none !important;
+}
+
+
+/* ==========================================================================
+   5. VS Code bridge (embedded editor / diff / terminal / menus)
+   ========================================================================== */
+html:has(> body.theme-light) {
+  --vscode-foreground: #3D3D3A !important;
+  --vscode-focusBorder: rgba(198, 97, 63, 0.55) !important;
+  --vscode-editor-background: #FAF9F5 !important;
+  --vscode-editorGutter-background: #FAF9F5 !important;
+  --vscode-editorPane-background: #FAF9F5 !important;
+  --vscode-editor-foreground: #141413 !important;
+  --vscode-editor-selectionBackground: rgba(217, 119, 87, 0.22) !important;
+  --vscode-editor-lineHighlightBackground: rgba(31, 30, 29, 0.035) !important;
+  --vscode-editorCursor-foreground: #C6613F !important;
+  --vscode-editorLineNumber-foreground: #B3B0A7 !important;
+  --vscode-editorLineNumber-activeForeground: #3D3D3A !important;
+  --vscode-editorWidget-background: #FFFFFF !important;
+  --vscode-editorWidget-border: rgba(31, 30, 29, 0.12) !important;
+  --vscode-editorHoverWidget-background: #FFFFFF !important;
+  --vscode-editorSuggestWidget-background: #FFFFFF !important;
+  --vscode-editorSuggestWidget-selectedBackground: #F0EEE6 !important;
+  --vscode-input-background: #FFFFFF !important;
+  --vscode-input-border: rgba(31, 30, 29, 0.15) !important;
+  --vscode-dropdown-background: #FFFFFF !important;
+  --vscode-menu-background: #FFFFFF !important;
+  --vscode-menu-selectionBackground: #F0EEE6 !important;
+  --vscode-list-hoverBackground: rgba(31, 30, 29, 0.04) !important;
+  --vscode-list-activeSelectionBackground: #E9E6DC !important;
+  --vscode-list-inactiveSelectionBackground: #F0EEE6 !important;
+  --vscode-list-focusBackground: #E9E6DC !important;
+  --vscode-sideBar-background: #F5F3EC !important;
+  --vscode-button-background: #C6613F !important;
+  --vscode-button-hoverBackground: #B5552F !important;
+  --vscode-badge-background: #C6613F !important;
+  --vscode-activityBarBadge-background: #C6613F !important;
+  --vscode-progressBar-background: #C6613F !important;
+  --vscode-textLink-foreground: #B4552F !important;
+  --vscode-textCodeBlock-background: #F2F0E9 !important;
+  --vscode-scrollbarSlider-background: rgba(31, 30, 29, 0.14) !important;
+  --vscode-scrollbarSlider-hoverBackground: rgba(31, 30, 29, 0.24) !important;
+  --vscode-diffEditor-insertedLineBackground: rgba(78, 122, 60, 0.10) !important;
+  --vscode-diffEditor-insertedTextBackground: rgba(78, 122, 60, 0.20) !important;
+  --vscode-diffEditor-removedLineBackground: rgba(181, 51, 51, 0.08) !important;
+  --vscode-diffEditor-removedTextBackground: rgba(181, 51, 51, 0.18) !important;
+}
+
+html:has(> body.theme-dark),
+html:has(> body.dark) {
+  --vscode-foreground: #C2C0B6 !important;
+  --vscode-descriptionForeground: #9C9A92 !important;
+  --vscode-icon-foreground: #C2C0B6 !important;
+  --vscode-focusBorder: rgba(217, 119, 87, 0.65) !important;
+  --vscode-widget-shadow: rgba(0, 0, 0, 0.45) !important;
+
+  --vscode-editor-background: #262624 !important;
+  --vscode-editor-foreground: #F0EEE6 !important;
+  --vscode-editorGutter-background: #262624 !important;
+  --vscode-editorPane-background: #262624 !important;
+  --vscode-editor-lineHighlightBackground: rgba(240, 238, 230, 0.035) !important;
+  --vscode-editor-lineHighlightBorder: transparent !important;
+  --vscode-editor-selectionBackground: rgba(217, 119, 87, 0.30) !important;
+  --vscode-editor-inactiveSelectionBackground: rgba(217, 119, 87, 0.16) !important;
+  --vscode-editor-selectionHighlightBackground: rgba(217, 119, 87, 0.12) !important;
+  --vscode-editorCursor-foreground: #D97757 !important;
+  --vscode-editorLineNumber-foreground: #5F5D57 !important;
+  --vscode-editorLineNumber-activeForeground: #C2C0B6 !important;
+  --vscode-editorIndentGuide-background1: rgba(240, 238, 230, 0.07) !important;
+  --vscode-editorIndentGuide-activeBackground1: rgba(240, 238, 230, 0.18) !important;
+
+  --vscode-editorWidget-background: #30302E !important;
+  --vscode-editorWidget-border: rgba(222, 220, 209, 0.12) !important;
+  --vscode-editorHoverWidget-background: #30302E !important;
+  --vscode-editorHoverWidget-border: rgba(222, 220, 209, 0.12) !important;
+  --vscode-editorSuggestWidget-background: #30302E !important;
+  --vscode-editorSuggestWidget-border: rgba(222, 220, 209, 0.12) !important;
+  --vscode-editorSuggestWidget-selectedBackground: #393835 !important;
+
+  --vscode-input-background: #30302E !important;
+  --vscode-input-foreground: #F0EEE6 !important;
+  --vscode-input-border: rgba(222, 220, 209, 0.14) !important;
+  --vscode-input-placeholderForeground: #75736C !important;
+  --vscode-dropdown-background: #30302E !important;
+  --vscode-dropdown-border: rgba(222, 220, 209, 0.14) !important;
+  --vscode-menu-background: #30302E !important;
+  --vscode-menu-foreground: #F0EEE6 !important;
+  --vscode-menu-selectionBackground: #393835 !important;
+  --vscode-menu-separatorBackground: rgba(222, 220, 209, 0.11) !important;
+  --vscode-quickInput-background: #30302E !important;
+  --vscode-quickInputList-focusBackground: #393835 !important;
+
+  --vscode-list-hoverBackground: rgba(240, 238, 230, 0.05) !important;
+  --vscode-list-activeSelectionBackground: #393835 !important;
+  --vscode-list-activeSelectionForeground: #FAF9F5 !important;
+  --vscode-list-inactiveSelectionBackground: #2B2A27 !important;
+  --vscode-list-focusBackground: #393835 !important;
+  --vscode-list-highlightForeground: #E39C80 !important;
+
+  --vscode-sideBar-background: #1F1E1D !important;
+  --vscode-panel-background: #262624 !important;
+  --vscode-panel-border: rgba(222, 220, 209, 0.10) !important;
+  --vscode-tab-activeBackground: #262624 !important;
+  --vscode-tab-inactiveBackground: #1F1E1D !important;
+  --vscode-editorGroupHeader-tabsBackground: #1F1E1D !important;
+  --vscode-titleBar-activeBackground: #1F1E1D !important;
+  --vscode-statusBar-background: #1F1E1D !important;
+
+  --vscode-button-background: #C6613F !important;
+  --vscode-button-foreground: #FFFFFF !important;
+  --vscode-button-hoverBackground: #D06D4B !important;
+  --vscode-button-secondaryBackground: #3A3936 !important;
+  --vscode-button-secondaryForeground: #F0EEE6 !important;
+  --vscode-button-secondaryHoverBackground: #44433F !important;
+  --vscode-badge-background: #C6613F !important;
+  --vscode-badge-foreground: #FFFFFF !important;
+  --vscode-progressBar-background: #D97757 !important;
+  --vscode-textLink-foreground: #E39C80 !important;
+  --vscode-textLink-activeForeground: #EDB29A !important;
+
+  --vscode-textCodeBlock-background: rgba(240, 238, 230, 0.06) !important;
+  --vscode-textPreformat-foreground: #E8A589 !important;
+  --vscode-textPreformat-background: rgba(240, 238, 230, 0.07) !important;
+  --vscode-textBlockQuote-background: #2B2A27 !important;
+  --vscode-textBlockQuote-border: rgba(217, 119, 87, 0.55) !important;
+
+  --vscode-scrollbarSlider-background: rgba(222, 220, 209, 0.12) !important;
+  --vscode-scrollbarSlider-hoverBackground: rgba(222, 220, 209, 0.20) !important;
+  --vscode-scrollbarSlider-activeBackground: rgba(222, 220, 209, 0.28) !important;
+  --vscode-scrollbar-shadow: transparent !important;
+
+  --vscode-diffEditor-insertedLineBackground: rgba(141, 182, 118, 0.10) !important;
+  --vscode-diffEditor-insertedTextBackground: rgba(141, 182, 118, 0.22) !important;
+  --vscode-diffEditor-removedLineBackground: rgba(229, 120, 109, 0.10) !important;
+  --vscode-diffEditor-removedTextBackground: rgba(229, 120, 109, 0.22) !important;
+
+  --vscode-terminal-background: #262624 !important;
+  --vscode-terminal-foreground: #E8E5DC !important;
+  --vscode-terminal-selectionBackground: rgba(217, 119, 87, 0.30) !important;
+  --vscode-terminalCursor-foreground: #D97757 !important;
+}
+
+/* SDK-rendered widgets that carry their own data-theme="dark" scope */
+body.theme-dark [data-theme="dark"] {
+  --sdk-color-text-base: #F0EEE6 !important;
+  --sdk-primary-color: #D97757 !important;
+  --sdk-background-primary: #30302E !important;
+}
+
+
+/* ==========================================================================
+   6. 字体分层体系 (both modes)
+   Every stack is "Latin fonts, then CJK fonts, then fallbacks": a font is
+   used for the characters it has, so Latin fonts (no CJK glyphs) draw the
+   letters and the CJK font draws the Chinese. Anything with CJK glyphs
+   (system-ui is Microsoft YaHei UI on Chinese Windows) must come after the
+   chosen CJK font, or it would capture the Chinese text first. Each Latin
+   stack names the Windows font, then the macOS one (BlinkMacSystemFont is
+   San Francisco, Latin only); a missing font is simply skipped.
+
+   Settings > Appearance > Fonts picks each half (attributes on <html>):
+     data-ag-latin  claude (default) | system
+       claude: sans UI, serif reading text (Anthropic/Tiempos when installed,
+               else Segoe UI + Georgia), monospace input and code
+       system: the computer's own fonts everywhere (Segoe UI, Cascadia/Consolas;
+               macOS: San Francisco, SF Mono/Menlo)
+     data-ag-cjk    wenkai (default) | system
+       wenkai: LXGW WenKai (霞鹜文楷);  system: Microsoft YaHei (微软雅黑) / PingFang SC (苹方)
+   ========================================================================== */
+html:has(> body) {
+  --ag-latin-ui: 'Anthropic Sans', 'Styrene B', 'Segoe UI', BlinkMacSystemFont, 'Helvetica Neue';
+  --ag-latin-read: 'Anthropic Serif', 'Tiempos Text', Georgia, Cambria;
+  --ag-latin-mono: 'Anthropic Mono', Consolas, 'SF Mono', Menlo;
+  --ag-latin-input: 'Anthropic Mono', Consolas, 'SF Mono', Menlo;
+  --ag-cjk: 'LXGW WenKai', 'LXGW WenKai Screen', '霞鹜文楷';
+  --ag-cjk-mono: 'LXGW WenKai Mono', 'LXGW WenKai', '霞鹜文楷';
+}
+html[data-ag-latin="system"]:has(> body) {
+  --ag-latin-ui: 'Segoe UI Variable Text', 'Segoe UI', BlinkMacSystemFont, 'Helvetica Neue';
+  --ag-latin-read: 'Segoe UI Variable Text', 'Segoe UI', BlinkMacSystemFont, 'Helvetica Neue';
+  --ag-latin-mono: 'Cascadia Mono', Consolas, 'SF Mono', Menlo;
+  --ag-latin-input: 'Segoe UI Variable Text', 'Segoe UI', BlinkMacSystemFont, 'Helvetica Neue';
+}
+html[data-ag-cjk="system"]:has(> body) {
+  --ag-cjk: 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC';
+  --ag-cjk-mono: 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC';
+}
+html:has(> body) {
+  --font-sans: var(--ag-latin-ui), var(--ag-cjk), 'Microsoft YaHei UI', 'PingFang SC', system-ui, sans-serif !important;
+  --font-mono: var(--ag-latin-mono), var(--ag-cjk-mono), 'Microsoft YaHei UI', 'PingFang SC', monospace !important;
+}
+
+/* UI 控件层 */
+body, button, input, select, textarea, .bg-sidebar, aside {
+  font-family: var(--ag-latin-ui), var(--ag-cjk), 'Microsoft YaHei UI', 'PingFang SC', system-ui, sans-serif !important;
+}
+
+/* 阅读正文层 (书卷气：西文衬线 + 中文文楷)
+   Scoped to chat content only. A bare `p, li, h1…h6` selector also hit UI
+   chrome (settings headings, the composer placeholder) and mixed serif into
+   the sans UI; Claude Code keeps the reading face inside replies. */
+[data-testid="planner-response-text"],
+[data-testid="planner-response-text"] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th),
+[class*="_code:not(pre_code)"] :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th),
+.prose, .markdown, [class*="chat-message"] {
+  font-family: var(--ag-latin-read), var(--ag-cjk), 'Microsoft YaHei', 'PingFang SC', serif !important;
+  line-height: 1.55 !important;
+  letter-spacing: -0.003em;
+}
+
+/* 思考链 (thinking): secondary text, so denser than replies. Tailwind's
+   leading-relaxed (1.625) on its container made it the airiest text in the app. */
+div.relative:has(> [data-testid="thinking-collapsible-trigger"]) .leading-relaxed,
+div.relative:has(> [data-testid="thinking-collapsible-trigger"]) .leading-relaxed :is(p, li, blockquote) {
+  line-height: 1.45 !important;
+}
+div.relative:has(> [data-testid="thinking-collapsible-trigger"]) .leading-relaxed :is(ul, ol) {
+  margin-top: 0.15em !important;
+  margin-bottom: 0.15em !important;
+}
+
+/* 加粗 (bold). WenKai has Regular + Medium only: for weight 600 Chromium took
+   Medium and then faked extra boldness on top, smearing Chinese bold. With
+   synthesis off, Chinese bold is Medium as designed. Latin bold in the
+   reading face is Georgia Bold, a very heavy cut; slightly softer ink keeps
+   it from overpowering the line. */
+html:has(> body) {
+  font-synthesis-weight: none;
+}
+[data-testid="planner-response-text"] :is(strong, b),
+[class*="_code:not(pre_code)"] :is(strong, b),
+[data-testid="user-input-step"] :is(strong, b) {
+  font-weight: 600 !important;
+  color: color-mix(in srgb, var(--foreground) 80%, var(--background)) !important;
+}
+
+/* 代码与终端层 */
+code, pre, .monaco-editor, .xterm, [class*="language-"] {
+  font-family: var(--ag-latin-mono), var(--ag-cjk-mono), 'Microsoft YaHei UI', 'PingFang SC', 'Courier New', monospace !important;
+}
+
+/* 主输入框编辑区 (Claude: typewriter-style monospace; system: the UI font) */
+div[contenteditable="true"], textarea, [data-composer], .ProseMirror {
+  font-family: var(--ag-latin-input), var(--ag-cjk), 'Microsoft YaHei UI', 'PingFang SC', monospace !important;
+}
+
+
+/* ==========================================================================
+   7. 顶部标题栏 · 隐藏 Antigravity 右侧的 File / View / Window 菜单
+   ========================================================================== */
+[data-testid="title-menu-bar"] > div:nth-child(n+2) {
+  display: none !important;
+}
+
+
+/* ==========================================================================
+   8. Classic style (经典) · neutral, like the Claude Code app
+   Light sampled from the Claude Code desktop app: #FCFCFB page, #FFFFFF
+   inputs, #E3E3E2 hairlines, #EBEBEA selected, near-black text, #2A78D6 blue.
+   Brand orange stays on the send button; selection, links and focus are blue.
+   Every block is scoped to html[data-ag-style="classic"], which outranks the
+   Clay selectors above, so Clay needs no changes.
+   ========================================================================== */
+html[data-ag-style="classic"]:has(> body.theme-light),
+html[data-ag-style="classic"] > body.theme-light {
+  --background: #FCFCFB !important;
+  --content: #FCFCFB !important;
+  --foreground: #0F0F0E !important;
+
+  --sidebar: #F6F6F5 !important;
+  --sidebar-secondary: #EBEBEA !important;
+  --sidebar-muted: #F0F0EF !important;
+
+  --card: #FFFFFF !important;
+  --card-border: rgba(0, 0, 0, 0.11) !important;
+  --border: rgba(0, 0, 0, 0.09) !important;
+
+  --secondary: #F1F1F0 !important;
+  --secondary-foreground: #3A3A39 !important;
+  --muted: #F3F3F2 !important;
+  --muted-foreground: #7A7975 !important;
+  --placeholder: #A09F9A !important;
+
+  --primary: #D97757 !important;
+  --primary-foreground: #FFFFFF !important;
+  --link: #2A78D6 !important;
+  --error: #C4352F !important;
+  --warning: #9A6A0B !important;
+  --success: #2F7D45 !important;
+  --code-foreground: #B4432F !important;
+
+  --focus-ring-color: rgba(42, 120, 214, 0.35) !important;
+  --focus-ring-offset-color: #FCFCFB !important;
+
+  --bg-selection: rgba(42, 120, 214, 0.20) !important;
+  --bg-selection-overlay: rgba(42, 120, 214, 0.15) !important;
+  --bg-cursor-line: rgba(0, 0, 0, 0.035) !important;
+  --fg-cursor: #0F0F0E !important;
+
+  --ag-user-bubble: #F1F1F0;
+  --ag-composer-border: rgba(0, 0, 0, 0.12);
+  --ag-composer-border-focus: rgba(0, 0, 0, 0.26);
+  --ag-composer-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 24px rgba(0, 0, 0, 0.05);
+  --ag-accent-fill: #D97757;
+  --ag-accent-fill-hover: #C6613F;
+  --ag-focus: rgba(42, 120, 214, 0.55);
+  --ag-selection: rgba(42, 120, 214, 0.22);
+  --ag-scroll-thumb: rgba(0, 0, 0, 0.16);
+  --ag-scroll-thumb-active: rgba(0, 0, 0, 0.32);
+  --ag-sidebar-text: #3A3A39;
+  --ag-sidebar-text-strong: #0F0F0E;
+  --ag-sidebar-label: #8A8984;
+}
+
+html[data-ag-style="classic"]:has(> body.theme-dark),
+html[data-ag-style="classic"]:has(> body.dark),
+html[data-ag-style="classic"] > body.theme-dark,
+html[data-ag-style="classic"] > body.dark {
+  --background: #1C1C1B !important;
+  --content: #1C1C1B !important;
+  --foreground: #ECECEA !important;
+
+  --sidebar: #161615 !important;
+  --sidebar-secondary: #2E2E2D !important;
+  --sidebar-muted: #232322 !important;
+
+  --card: #262625 !important;
+  --card-border: rgba(255, 255, 255, 0.12) !important;
+  --border: rgba(255, 255, 255, 0.09) !important;
+
+  --secondary: #2C2C2B !important;
+  --secondary-foreground: #C4C4C1 !important;
+  --muted: #232322 !important;
+  --muted-foreground: #9A9994 !important;
+  --placeholder: #6F6E6A !important;
+
+  --primary: #D97757 !important;
+  --primary-foreground: #FFFFFF !important;
+  --link: #5A9CF0 !important;
+  --error: #F07A70 !important;
+  --warning: #E3A858 !important;
+  --success: #6CC08A !important;
+  --code-foreground: #F0A08A !important;
+
+  --focus-ring-color: rgba(90, 156, 240, 0.40) !important;
+  --focus-ring-offset-color: #1C1C1B !important;
+
+  --bg-selection: rgba(66, 140, 235, 0.32) !important;
+  --bg-selection-overlay: rgba(66, 140, 235, 0.24) !important;
+  --bg-cursor-line: rgba(255, 255, 255, 0.035) !important;
+  --fg-cursor: #ECECEA !important;
+
+  --ag-user-bubble: #262625;
+  --ag-composer-border: rgba(255, 255, 255, 0.13);
+  --ag-composer-border-focus: rgba(255, 255, 255, 0.26);
+  --ag-composer-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 28px rgba(0, 0, 0, 0.32);
+  --ag-accent-fill: #D97757;
+  --ag-accent-fill-hover: #E08A6C;
+  --ag-focus: rgba(90, 156, 240, 0.60);
+  --ag-selection: rgba(66, 140, 235, 0.34);
+  --ag-scroll-thumb: rgba(255, 255, 255, 0.14);
+  --ag-scroll-thumb-active: rgba(255, 255, 255, 0.28);
+  --ag-sidebar-text: #CFCFCC;
+  --ag-sidebar-text-strong: #FAFAF9;
+  --ag-sidebar-label: #8C8B86;
+}
+
+/* 8b. Code syntax: GitHub-style, the "traditional" look */
+html[data-ag-style="classic"] > body.theme-light {
+  --syntax-default-fg: #1F2328 !important;
+  --syntax-comment: #6E7781 !important;
+  --syntax-punctuation: #57606A !important;
+  --syntax-property: #0550AE !important;
+  --syntax-tag: #116329 !important;
+  --syntax-constant: #0550AE !important;
+  --syntax-deleted: #CF222E !important;
+  --syntax-number: #0550AE !important;
+  --syntax-string: #0A3069 !important;
+  --syntax-inserted: #116329 !important;
+  --syntax-attr-name: #0550AE !important;
+  --syntax-builtin: #8250DF !important;
+  --syntax-operator: #57606A !important;
+  --syntax-variable: #953800 !important;
+  --syntax-attr-value: #0A3069 !important;
+  --syntax-keyword: #CF222E !important;
+  --syntax-function: #8250DF !important;
+  --syntax-class-name: #953800 !important;
+  --syntax-regex: #116329 !important;
+}
+html[data-ag-style="classic"] > body.theme-dark,
+html[data-ag-style="classic"] > body.dark {
+  --syntax-default-fg: #E6EDF3 !important;
+  --syntax-comment: #8B949E !important;
+  --syntax-punctuation: #C9D1D9 !important;
+  --syntax-property: #79C0FF !important;
+  --syntax-tag: #7EE787 !important;
+  --syntax-constant: #79C0FF !important;
+  --syntax-deleted: #FFA198 !important;
+  --syntax-number: #79C0FF !important;
+  --syntax-string: #A5D6FF !important;
+  --syntax-inserted: #7EE787 !important;
+  --syntax-attr-name: #79C0FF !important;
+  --syntax-builtin: #D2A8FF !important;
+  --syntax-operator: #C9D1D9 !important;
+  --syntax-variable: #FFA657 !important;
+  --syntax-attr-value: #A5D6FF !important;
+  --syntax-keyword: #FF7B72 !important;
+  --syntax-function: #D2A8FF !important;
+  --syntax-class-name: #FFA657 !important;
+  --syntax-regex: #7EE787 !important;
+}
+
+/* 8c. VS Code bridge: neutral surfaces, blue selection and links */
+html[data-ag-style="classic"]:has(> body.theme-light) {
+  --vscode-foreground: #3A3A39 !important;
+  --vscode-focusBorder: rgba(42, 120, 214, 0.55) !important;
+  --vscode-editor-background: #FCFCFB !important;
+  --vscode-editorGutter-background: #FCFCFB !important;
+  --vscode-editorPane-background: #FCFCFB !important;
+  --vscode-editor-foreground: #0F0F0E !important;
+  --vscode-editor-selectionBackground: rgba(42, 120, 214, 0.20) !important;
+  --vscode-editor-lineHighlightBackground: rgba(0, 0, 0, 0.035) !important;
+  --vscode-editorCursor-foreground: #0F0F0E !important;
+  --vscode-editorLineNumber-foreground: #B0AFAA !important;
+  --vscode-editorLineNumber-activeForeground: #3A3A39 !important;
+  --vscode-editorWidget-border: rgba(0, 0, 0, 0.11) !important;
+  --vscode-editorSuggestWidget-selectedBackground: #EBEBEA !important;
+  --vscode-input-border: rgba(0, 0, 0, 0.13) !important;
+  --vscode-menu-selectionBackground: #EBEBEA !important;
+  --vscode-list-hoverBackground: rgba(0, 0, 0, 0.04) !important;
+  --vscode-list-activeSelectionBackground: #EBEBEA !important;
+  --vscode-list-inactiveSelectionBackground: #F1F1F0 !important;
+  --vscode-list-focusBackground: #EBEBEA !important;
+  --vscode-sideBar-background: #F6F6F5 !important;
+  --vscode-button-background: #D97757 !important;
+  --vscode-button-hoverBackground: #C6613F !important;
+  --vscode-badge-background: #2A78D6 !important;
+  --vscode-activityBarBadge-background: #2A78D6 !important;
+  --vscode-progressBar-background: #2A78D6 !important;
+  --vscode-textLink-foreground: #2A78D6 !important;
+  --vscode-textCodeBlock-background: #F3F3F2 !important;
+  --vscode-scrollbarSlider-background: rgba(0, 0, 0, 0.13) !important;
+  --vscode-scrollbarSlider-hoverBackground: rgba(0, 0, 0, 0.22) !important;
+  --vscode-diffEditor-insertedLineBackground: rgba(47, 125, 69, 0.10) !important;
+  --vscode-diffEditor-insertedTextBackground: rgba(47, 125, 69, 0.20) !important;
+  --vscode-diffEditor-removedLineBackground: rgba(196, 53, 47, 0.08) !important;
+  --vscode-diffEditor-removedTextBackground: rgba(196, 53, 47, 0.18) !important;
+}
+html[data-ag-style="classic"]:has(> body.theme-dark),
+html[data-ag-style="classic"]:has(> body.dark) {
+  --vscode-foreground: #C4C4C1 !important;
+  --vscode-descriptionForeground: #9A9994 !important;
+  --vscode-icon-foreground: #C4C4C1 !important;
+  --vscode-focusBorder: rgba(90, 156, 240, 0.65) !important;
+  --vscode-editor-background: #1C1C1B !important;
+  --vscode-editor-foreground: #ECECEA !important;
+  --vscode-editorGutter-background: #1C1C1B !important;
+  --vscode-editorPane-background: #1C1C1B !important;
+  --vscode-editor-lineHighlightBackground: rgba(255, 255, 255, 0.035) !important;
+  --vscode-editor-selectionBackground: rgba(66, 140, 235, 0.32) !important;
+  --vscode-editor-inactiveSelectionBackground: rgba(66, 140, 235, 0.16) !important;
+  --vscode-editor-selectionHighlightBackground: rgba(66, 140, 235, 0.12) !important;
+  --vscode-editorCursor-foreground: #ECECEA !important;
+  --vscode-editorLineNumber-foreground: #5C5C59 !important;
+  --vscode-editorLineNumber-activeForeground: #C4C4C1 !important;
+  --vscode-editorIndentGuide-background1: rgba(255, 255, 255, 0.07) !important;
+  --vscode-editorIndentGuide-activeBackground1: rgba(255, 255, 255, 0.18) !important;
+  --vscode-editorWidget-background: #262625 !important;
+  --vscode-editorWidget-border: rgba(255, 255, 255, 0.12) !important;
+  --vscode-editorHoverWidget-background: #262625 !important;
+  --vscode-editorHoverWidget-border: rgba(255, 255, 255, 0.12) !important;
+  --vscode-editorSuggestWidget-background: #262625 !important;
+  --vscode-editorSuggestWidget-border: rgba(255, 255, 255, 0.12) !important;
+  --vscode-editorSuggestWidget-selectedBackground: #2E2E2D !important;
+  --vscode-input-background: #262625 !important;
+  --vscode-input-foreground: #ECECEA !important;
+  --vscode-input-border: rgba(255, 255, 255, 0.13) !important;
+  --vscode-input-placeholderForeground: #6F6E6A !important;
+  --vscode-dropdown-background: #262625 !important;
+  --vscode-dropdown-border: rgba(255, 255, 255, 0.13) !important;
+  --vscode-menu-background: #262625 !important;
+  --vscode-menu-foreground: #ECECEA !important;
+  --vscode-menu-selectionBackground: #2E2E2D !important;
+  --vscode-menu-separatorBackground: rgba(255, 255, 255, 0.09) !important;
+  --vscode-quickInput-background: #262625 !important;
+  --vscode-quickInputList-focusBackground: #2E2E2D !important;
+  --vscode-list-hoverBackground: rgba(255, 255, 255, 0.05) !important;
+  --vscode-list-activeSelectionBackground: #2E2E2D !important;
+  --vscode-list-activeSelectionForeground: #FAFAF9 !important;
+  --vscode-list-inactiveSelectionBackground: #232322 !important;
+  --vscode-list-focusBackground: #2E2E2D !important;
+  --vscode-list-highlightForeground: #5A9CF0 !important;
+  --vscode-sideBar-background: #161615 !important;
+  --vscode-panel-background: #1C1C1B !important;
+  --vscode-panel-border: rgba(255, 255, 255, 0.09) !important;
+  --vscode-tab-activeBackground: #1C1C1B !important;
+  --vscode-tab-inactiveBackground: #161615 !important;
+  --vscode-editorGroupHeader-tabsBackground: #161615 !important;
+  --vscode-titleBar-activeBackground: #161615 !important;
+  --vscode-statusBar-background: #161615 !important;
+  --vscode-button-background: #D97757 !important;
+  --vscode-button-hoverBackground: #E08A6C !important;
+  --vscode-button-secondaryBackground: #2C2C2B !important;
+  --vscode-button-secondaryForeground: #ECECEA !important;
+  --vscode-button-secondaryHoverBackground: #363635 !important;
+  --vscode-badge-background: #2A78D6 !important;
+  --vscode-progressBar-background: #5A9CF0 !important;
+  --vscode-textLink-foreground: #5A9CF0 !important;
+  --vscode-textLink-activeForeground: #7DB2F5 !important;
+  --vscode-textCodeBlock-background: rgba(255, 255, 255, 0.06) !important;
+  --vscode-textPreformat-foreground: #F0A08A !important;
+  --vscode-textPreformat-background: rgba(255, 255, 255, 0.07) !important;
+  --vscode-textBlockQuote-background: #232322 !important;
+  --vscode-textBlockQuote-border: rgba(90, 156, 240, 0.55) !important;
+  --vscode-scrollbarSlider-background: rgba(255, 255, 255, 0.11) !important;
+  --vscode-scrollbarSlider-hoverBackground: rgba(255, 255, 255, 0.19) !important;
+  --vscode-scrollbarSlider-activeBackground: rgba(255, 255, 255, 0.27) !important;
+  --vscode-diffEditor-insertedLineBackground: rgba(108, 192, 138, 0.10) !important;
+  --vscode-diffEditor-insertedTextBackground: rgba(108, 192, 138, 0.22) !important;
+  --vscode-diffEditor-removedLineBackground: rgba(240, 122, 112, 0.10) !important;
+  --vscode-diffEditor-removedTextBackground: rgba(240, 122, 112, 0.22) !important;
+  --vscode-terminal-background: #1C1C1B !important;
+  --vscode-terminal-foreground: #E6E6E3 !important;
+  --vscode-terminal-selectionBackground: rgba(66, 140, 235, 0.32) !important;
+  --vscode-terminalCursor-foreground: #ECECEA !important;
+}
+html[data-ag-style="classic"] > body.theme-dark [data-theme="dark"] {
+  --sdk-color-text-base: #ECECEA !important;
+  --sdk-background-primary: #262625 !important;
+}
+
+
+/* ==========================================================================
+   9. Narrow windows · auxiliary pane (辅助窗格)
+   The conversation column is a split row (container-type: size): the
+   conversation (min-width 300px) and, last, the aux pane, sized as a % of
+   the row that never shrinks. In a half-screen window the two minimums add
+   up to more than the row, so the pane was pushed past the window edge.
+   Below 900px it becomes a drawer over the conversation; above, it is
+   capped so the conversation keeps its 300px.
+   ========================================================================== */
+.outline-none[style*="container-type"] > div[style*="flex-shrink: 0"]:last-child {
+  max-width: calc(100% - 301px);
+}
+.outline-none[style*="container-type"] > div[style*="flex-shrink: 0"]:last-child > div[style*="cqw"] {
+  max-width: 100%;
+}
+@container (max-width: 900px) {
+  .outline-none[style*="container-type"] > div[style*="flex-shrink: 0"]:last-child {
+    position: absolute !important;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: min(100%, max(360px, 70%)) !important;
+    max-width: none;
+    background: var(--background);
+    border-left: 1px solid var(--border);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.12);
+    transform: translateX(0);
+    transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1), visibility 260ms step-end !important;
+  }
+  .outline-none[style*="container-type"] > div[style*="flex-shrink: 0"][style*="width: 0%"]:last-child {
+    transform: translateX(100%);
+    box-shadow: none;
+  }
+  .outline-none[style*="container-type"] > div[style*="flex-shrink: 0"]:last-child > div[style*="cqw"] {
+    width: 100% !important;
+    max-width: none;
+  }
+  /* the resize handle has nothing to resize in drawer mode */
+  .outline-none[style*="container-type"]:has(> div[style*="flex-shrink: 0"]:last-child) > .bg-border {
+    display: none;
+  }
+}
+
+
+/* ==========================================================================
+   10. Settings: the app's "Chat Settings" section (Appearance) is mirrored
+   under General > Conversations by i18n.js; the original stays mounted but
+   hidden, so the mirror can operate it.
+   ========================================================================== */
+[data-ag-moved] {
+  display: none !important;
+}
